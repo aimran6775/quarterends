@@ -1,0 +1,41 @@
+{
+  "name": "quarterends",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "deploy": "npm run build && firebase deploy",
+    "deploy:hosting": "npm run build && firebase deploy --only hosting",
+    "deploy:firestore": "firebase deploy --only firestore",
+    "deploy:functions": "firebase deploy --only functions"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@stripe/react-stripe-js": "^5.4.1",
+    "@stripe/stripe-js": "^8.5.3",
+    "firebase": "^12.6.0",
+    "openai": "^6.9.1",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-helmet-async": "^2.0.5",
+    "react-router-dom": "^7.9.6"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.17",
+    "@types/react": "^19.2.6",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^4.7.0",
+    "autoprefixer": "^10.4.22",
+    "firebase-tools": "^14.26.0",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.17",
+    "typescript": "^5.9.3",
+    "vite": "^6.4.1"
+  }
+}

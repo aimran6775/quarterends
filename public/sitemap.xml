@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  
+  <!-- Home Page -->
+  <url>
+    <loc>https://quarterends.com/</loc>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+    <lastmod>2025-11-24</lastmod>
+  </url>
+  
+  <!-- Shop Page -->
+  <url>
+    <loc>https://quarterends.com/shop</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <lastmod>2025-11-24</lastmod>
+  </url>
+  
+  <!-- About Page -->
+  <url>
+    <loc>https://quarterends.com/about</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <lastmod>2025-11-24</lastmod>
+  </url>
+  
+  <!-- Contact Page -->
+  <url>
+    <loc>https://quarterends.com/contact</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <lastmod>2025-11-24</lastmod>
+  </url>
+  
+  <!-- Login Page -->
+  <url>
+    <loc>https://quarterends.com/login</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+    <lastmod>2025-11-24</lastmod>
+  </url>
+  
+  <!-- Signup Page -->
+  <url>
+    <loc>https://quarterends.com/signup</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+    <lastmod>2025-11-24</lastmod>
+  </url>
+  
+  <!-- 
+    Product pages should be dynamically added here
+    Example:
+    <url>
+      <loc>https://quarterends.com/product/[product-id]</loc>
+      <changefreq>weekly</changefreq>
+      <priority>0.8</priority>
+      <lastmod>2025-11-24</lastmod>
+      <image:image>
+        <image:loc>[product-image-url]</image:loc>
+        <image:caption>[product-name]</image:caption>
+      </image:image>
+    </url>
+  -->
+  
+</urlset>

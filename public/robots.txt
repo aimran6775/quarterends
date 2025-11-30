@@ -1,0 +1,26 @@
+User-agent: *
+Allow: /
+
+# Disallow admin pages
+Disallow: /admin/
+Disallow: /admin/*
+
+# Disallow internal pages
+Disallow: /checkout
+Disallow: /profile
+Disallow: /order-confirmation/*
+Disallow: /order-tracking/*
+
+# Allow all other pages
+Allow: /
+Allow: /shop
+Allow: /about
+Allow: /contact
+Allow: /product/*
+Allow: /cart
+Allow: /wishlist
+Allow: /login
+Allow: /signup
+
+# Sitemap location
+Sitemap: https://quarterends.com/sitemap.xml
