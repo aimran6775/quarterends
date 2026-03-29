@@ -1,7 +1,6 @@
 import { useParams, Link } from 'react-router-dom'
 import { useState, useEffect } from 'react'
-import { doc, getDoc, collection, getDocs, query, where, limit } from 'firebase/firestore'
-import { db } from '../config/firebase'
+import { getProductById, mockProducts, getProductsByCategory } from '../data/products'
 import { Product } from '../types'
 import { useCart } from '../contexts/CartContext'
 import { useWishlist } from '../contexts/WishlistContext'
@@ -32,13 +31,12 @@ const ProductDetail = () => {
     }
   }, [product])
 
-  const fetchProduct = async () => {
+  const fetchProduct = () => {
     if (!id) return
     setLoading(true)
     try {
-      const productDoc = await getDoc(doc(db, 'products', id))
-      if (productDoc.exists()) {
-        const productData = { id: productDoc.id, ...productDoc.data() } as Product
+      const productData = getProductById(id)
+      if (productData) {
         setProduct(productData)
         if (productData.colors.length > 0) {
           setSelectedColor(productData.colors[0])
@@ -54,30 +52,17 @@ const ProductDetail = () => {
   const fetchRelatedProducts = async () => {
     if (!id || !product) return
     try {
-      // Fetch all products for AI recommendations
-      const allProductsSnapshot = await getDocs(collection(db, 'products'))
-      const allProducts = allProductsSnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as Product[]
-
       // Get AI-powered recommendations
-      const recommendations = await getProductRecommendations(product, allProducts)
+      const recommendations = await getProductRecommendations(product, mockProducts)
       
       if (recommendations.length > 0) {
         setRelatedProducts(recommendations)
       } else {
-        // Fallback to category-based if AI fails
-        const relatedQuery = query(
-          collection(db, 'products'),
-          where('category', '==', product.category),
-          limit(4)
-        )
-        const snapshot = await getDocs(relatedQuery)
-        const related = snapshot.docs
-          .map(doc => ({ id: doc.id, ...doc.data() }) as Product)
+        // Fallback to category-based
+        const related = getProductsByCategory(product.category)
           .filter(p => p.id !== id)
-        setRelatedProducts(related.slice(0, 4))
+          .slice(0, 4)
+        setRelatedProducts(related)
       }
     } catch (error) {
       console.error('Error fetching related products:', error)

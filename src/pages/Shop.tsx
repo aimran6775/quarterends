@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { collection, getDocs, query, where, orderBy, limit, startAfter, DocumentData } from 'firebase/firestore'
-import { db } from '../config/firebase'
+import { mockProducts } from '../data/products'
 import { Product } from '../types'
 import { useWishlist } from '../contexts/WishlistContext'
 
@@ -26,32 +25,26 @@ const Shop = () => {
     fetchProducts()
   }, [filters, sortBy, currentPage])
 
-  const fetchProducts = async () => {
+  const fetchProducts = () => {
     setLoading(true)
     try {
-      let productsQuery = query(collection(db, 'products'))
+      let allProducts = [...mockProducts]
 
-      // Apply filters
+      // Apply category filter
       if (filters.categories.length > 0 && !filters.categories.includes('all')) {
-        productsQuery = query(productsQuery, where('category', 'in', filters.categories))
+        allProducts = allProducts.filter(p => filters.categories.includes(p.category))
       }
 
       // Apply sorting
       if (sortBy === 'price-asc') {
-        productsQuery = query(productsQuery, orderBy('price', 'asc'))
+        allProducts.sort((a, b) => a.price - b.price)
       } else if (sortBy === 'price-desc') {
-        productsQuery = query(productsQuery, orderBy('price', 'desc'))
+        allProducts.sort((a, b) => b.price - a.price)
       } else if (sortBy === 'newest') {
-        productsQuery = query(productsQuery, orderBy('createdAt', 'desc'))
+        allProducts.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
       } else if (sortBy === 'featured') {
-        productsQuery = query(productsQuery, orderBy('featured', 'desc'))
+        allProducts.sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0))
       }
-
-      const snapshot = await getDocs(productsQuery)
-      let allProducts = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as Product[]
 
       // Client-side filtering for complex filters
       if (filters.priceRanges.length > 0) {

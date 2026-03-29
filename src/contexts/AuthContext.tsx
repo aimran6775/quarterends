@@ -1,18 +1,20 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
-import {
-  User,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signInWithPopup,
-  signOut,
-  onAuthStateChanged,
-  updateProfile,
-} from 'firebase/auth'
-import { doc, setDoc, getDoc } from 'firebase/firestore'
-import { auth, googleProvider, db } from '../config/firebase'
+
+// -------- Local user types (Firebase-free) --------
+
+interface LocalUser {
+  uid: string
+  email: string | null
+  displayName: string | null
+  photoURL: string | null
+}
+
+interface StoredUser extends LocalUser {
+  password: string
+}
 
 interface AuthContextType {
-  user: User | null
+  user: LocalUser | null
   userRole: 'admin' | 'user' | null
   loading: boolean
   signUp: (email: string, password: string, name: string) => Promise<void>
@@ -20,6 +22,60 @@ interface AuthContextType {
   signInWithGoogle: () => Promise<void>
   logout: () => Promise<void>
 }
+
+// -------- localStorage helpers --------
+
+const CURRENT_USER_KEY = 'auth_user'
+const ALL_USERS_KEY = 'auth_users'
+
+function generateUid(): string {
+  return (
+    typeof crypto !== 'undefined' && crypto.randomUUID
+      ? crypto.randomUUID()
+      : `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`
+  )
+}
+
+function getAllUsers(): StoredUser[] {
+  try {
+    const raw = localStorage.getItem(ALL_USERS_KEY)
+    return raw ? JSON.parse(raw) : []
+  } catch {
+    return []
+  }
+}
+
+function saveAllUsers(users: StoredUser[]): void {
+  localStorage.setItem(ALL_USERS_KEY, JSON.stringify(users))
+}
+
+function saveCurrentUser(u: LocalUser): void {
+  localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(u))
+}
+
+function clearCurrentUser(): void {
+  localStorage.removeItem(CURRENT_USER_KEY)
+}
+
+function loadCurrentUser(): LocalUser | null {
+  try {
+    const raw = localStorage.getItem(CURRENT_USER_KEY)
+    return raw ? JSON.parse(raw) : null
+  } catch {
+    return null
+  }
+}
+
+function toLocalUser(s: StoredUser): LocalUser {
+  return { uid: s.uid, email: s.email, displayName: s.displayName, photoURL: s.photoURL }
+}
+
+function deriveRole(u: LocalUser | null): 'admin' | 'user' | null {
+  if (!u) return null
+  return u.email?.toLowerCase().startsWith('admin') ? 'admin' : 'user'
+}
+
+// -------- Context --------
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
@@ -36,73 +92,80 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
-  const [user, setUser] = useState<User | null>(null)
+  const [user, setUser] = useState<LocalUser | null>(null)
   const [userRole, setUserRole] = useState<'admin' | 'user' | null>(null)
   const [loading, setLoading] = useState(true)
 
+  // Restore session from localStorage on mount
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      setUser(user)
-      
-      if (user) {
-        // Fetch user role from Firestore
-        const userDoc = await getDoc(doc(db, 'users', user.uid))
-        if (userDoc.exists()) {
-          setUserRole(userDoc.data().role || 'user')
-        } else {
-          setUserRole('user')
-        }
-      } else {
-        setUserRole(null)
+    const timer = setTimeout(() => {
+      const restored = loadCurrentUser()
+      if (restored) {
+        setUser(restored)
+        setUserRole(deriveRole(restored))
       }
-      
       setLoading(false)
-    })
+    }, 150) // small delay to simulate async check
 
-    return unsubscribe
+    return () => clearTimeout(timer)
   }, [])
 
   const signUp = async (email: string, password: string, name: string) => {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password)
-    await updateProfile(userCredential.user, { displayName: name })
-    
-    // Create user document in Firestore
-    await setDoc(doc(db, 'users', userCredential.user.uid), {
-      uid: userCredential.user.uid,
-      email: userCredential.user.email,
+    const users = getAllUsers()
+    if (users.some((u) => u.email === email)) {
+      throw new Error('A user with this email already exists.')
+    }
+
+    const newUser: StoredUser = {
+      uid: generateUid(),
+      email,
       displayName: name,
-      role: 'user',
-      createdAt: new Date().toISOString(),
-      wishlist: [],
-      addresses: [],
-    })
+      photoURL: null,
+      password,
+    }
+
+    saveAllUsers([...users, newUser])
+    const local = toLocalUser(newUser)
+    saveCurrentUser(local)
+    setUser(local)
+    setUserRole(deriveRole(local))
   }
 
   const signIn = async (email: string, password: string) => {
-    await signInWithEmailAndPassword(auth, email, password)
+    const users = getAllUsers()
+    const match = users.find((u) => u.email === email && u.password === password)
+    if (!match) {
+      throw new Error('Invalid email or password.')
+    }
+
+    const local = toLocalUser(match)
+    saveCurrentUser(local)
+    setUser(local)
+    setUserRole(deriveRole(local))
   }
 
   const signInWithGoogle = async () => {
-    const userCredential = await signInWithPopup(auth, googleProvider)
-    
-    // Check if user document exists, if not create it
-    const userDoc = await getDoc(doc(db, 'users', userCredential.user.uid))
-    if (!userDoc.exists()) {
-      await setDoc(doc(db, 'users', userCredential.user.uid), {
-        uid: userCredential.user.uid,
-        email: userCredential.user.email,
-        displayName: userCredential.user.displayName,
-        photoURL: userCredential.user.photoURL,
-        role: 'user',
-        createdAt: new Date().toISOString(),
-        wishlist: [],
-        addresses: [],
-      })
+    const googleUser: LocalUser = {
+      uid: generateUid(),
+      email: `googleuser_${Date.now()}@gmail.com`,
+      displayName: 'Google User',
+      photoURL: 'https://lh3.googleusercontent.com/a/default-user',
     }
+
+    // Persist in the users array so they can sign in again
+    const stored: StoredUser = { ...googleUser, password: '' }
+    const users = getAllUsers()
+    saveAllUsers([...users, stored])
+
+    saveCurrentUser(googleUser)
+    setUser(googleUser)
+    setUserRole(deriveRole(googleUser))
   }
 
   const logout = async () => {
-    await signOut(auth)
+    clearCurrentUser()
+    setUser(null)
+    setUserRole(null)
   }
 
   const value: AuthContextType = {

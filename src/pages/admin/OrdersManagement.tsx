@@ -1,6 +1,4 @@
 import { useState, useEffect } from 'react'
-import { collection, getDocs, doc, updateDoc, query, orderBy } from 'firebase/firestore'
-import { db } from '../../config/firebase'
 import { Order } from '../../types'
 
 const OrdersManagement = () => {
@@ -13,14 +11,10 @@ const OrdersManagement = () => {
     fetchOrders()
   }, [])
 
-  const fetchOrders = async () => {
+  const fetchOrders = () => {
     try {
-      const ordersQuery = query(collection(db, 'orders'), orderBy('createdAt', 'desc'))
-      const ordersSnap = await getDocs(ordersQuery)
-      const ordersData = ordersSnap.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as Order[]
+      const ordersData = JSON.parse(localStorage.getItem('orders') || '[]') as Order[]
+      ordersData.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
       setOrders(ordersData)
     } catch (error) {
       console.error('Error fetching orders:', error)
@@ -29,12 +23,13 @@ const OrdersManagement = () => {
     }
   }
 
-  const updateOrderStatus = async (orderId: string, status: Order['status']) => {
+  const updateOrderStatus = (orderId: string, status: Order['status']) => {
     try {
-      await updateDoc(doc(db, 'orders', orderId), { status })
-      setOrders(orders.map(order => 
+      const updatedOrders = orders.map(order => 
         order.id === orderId ? { ...order, status } : order
-      ))
+      )
+      setOrders(updatedOrders)
+      localStorage.setItem('orders', JSON.stringify(updatedOrders))
       alert('Order status updated successfully')
     } catch (error) {
       console.error('Error updating order:', error)
@@ -42,14 +37,15 @@ const OrdersManagement = () => {
     }
   }
 
-  const updateTrackingNumber = async (orderId: string) => {
+  const updateTrackingNumber = (orderId: string) => {
     const trackingNumber = prompt('Enter tracking number:')
     if (trackingNumber) {
       try {
-        await updateDoc(doc(db, 'orders', orderId), { trackingNumber })
-        setOrders(orders.map(order => 
+        const updatedOrders = orders.map(order => 
           order.id === orderId ? { ...order, trackingNumber } : order
-        ))
+        )
+        setOrders(updatedOrders)
+        localStorage.setItem('orders', JSON.stringify(updatedOrders))
         alert('Tracking number updated successfully')
       } catch (error) {
         console.error('Error updating tracking:', error)
@@ -149,7 +145,7 @@ const OrdersManagement = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className="text-sm text-gray-900">
-                        {order.createdAt ? new Date(order.createdAt.seconds * 1000).toLocaleDateString() : 'N/A'}
+                        {order.createdAt ? new Date(order.createdAt as string).toLocaleDateString() : 'N/A'}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -219,7 +215,7 @@ const OrdersManagement = () => {
                     <span className="text-gray-600">Date:</span>
                     <span>
                       {selectedOrder.createdAt 
-                        ? new Date(selectedOrder.createdAt.seconds * 1000).toLocaleString()
+                        ? new Date(selectedOrder.createdAt as string).toLocaleString()
                         : 'N/A'}
                     </span>
                   </div>

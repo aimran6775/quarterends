@@ -1,57 +1,23 @@
-import { logEvent } from 'firebase/analytics'
-import { analytics } from '../config/firebase'
+// Analytics stub - Firebase removed
 
-// E-commerce tracking events
 export const trackPageView = (pageName: string) => {
-  logEvent(analytics, 'page_view', {
-    page_title: pageName,
-    page_location: window.location.href,
-    page_path: window.location.pathname
-  })
+  console.log('[Analytics] page_view:', pageName)
 }
 
 export const trackProductView = (productId: string, productName: string, price: number) => {
-  logEvent(analytics, 'view_item', {
-    items: [{
-      item_id: productId,
-      item_name: productName,
-      price: price
-    }]
-  })
+  console.log('[Analytics] view_item:', productId, productName, price)
 }
 
 export const trackAddToCart = (productId: string, productName: string, price: number, quantity: number) => {
-  logEvent(analytics, 'add_to_cart', {
-    currency: 'USD',
-    value: price * quantity,
-    items: [{
-      item_id: productId,
-      item_name: productName,
-      price: price,
-      quantity: quantity
-    }]
-  })
+  console.log('[Analytics] add_to_cart:', productId, productName, price, quantity)
 }
 
 export const trackRemoveFromCart = (productId: string, productName: string, price: number, quantity: number) => {
-  logEvent(analytics, 'remove_from_cart', {
-    currency: 'USD',
-    value: price * quantity,
-    items: [{
-      item_id: productId,
-      item_name: productName,
-      price: price,
-      quantity: quantity
-    }]
-  })
+  console.log('[Analytics] remove_from_cart:', productId, productName, price, quantity)
 }
 
 export const trackBeginCheckout = (items: any[], totalValue: number) => {
-  logEvent(analytics, 'begin_checkout', {
-    currency: 'USD',
-    value: totalValue,
-    items: items
-  })
+  console.log('[Analytics] begin_checkout:', items.length, 'items, total:', totalValue)
 }
 
 export const trackPurchase = (
@@ -61,54 +27,29 @@ export const trackPurchase = (
   tax: number,
   shipping: number
 ) => {
-  logEvent(analytics, 'purchase', {
-    transaction_id: orderId,
-    currency: 'USD',
-    value: totalValue,
-    tax: tax,
-    shipping: shipping,
-    items: items
-  })
+  console.log('[Analytics] purchase:', orderId, totalValue)
 }
 
 export const trackSearch = (searchTerm: string) => {
-  logEvent(analytics, 'search', {
-    search_term: searchTerm
-  })
+  console.log('[Analytics] search:', searchTerm)
 }
 
 export const trackLogin = (method: string) => {
-  logEvent(analytics, 'login', {
-    method: method
-  })
+  console.log('[Analytics] login:', method)
 }
 
 export const trackSignUp = (method: string) => {
-  logEvent(analytics, 'sign_up', {
-    method: method
-  })
+  console.log('[Analytics] sign_up:', method)
 }
 
 export const trackAddToWishlist = (productId: string, productName: string, price: number) => {
-  logEvent(analytics, 'add_to_wishlist', {
-    currency: 'USD',
-    value: price,
-    items: [{
-      item_id: productId,
-      item_name: productName,
-      price: price
-    }]
-  })
+  console.log('[Analytics] add_to_wishlist:', productId, productName, price)
 }
 
 export const trackChatbotInteraction = (question: string) => {
-  logEvent(analytics, 'chatbot_interaction', {
-    question: question
-  })
+  console.log('[Analytics] chatbot_interaction:', question)
 }
 
 export const trackVisualSearch = () => {
-  logEvent(analytics, 'visual_search', {
-    feature: 'ai_image_search'
-  })
+  console.log('[Analytics] visual_search')
 }

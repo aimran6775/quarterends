@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { doc, getDoc } from 'firebase/firestore'
-import { db } from '../config/firebase'
+import { getProductById } from '../data/products'
 import { useWishlist } from '../contexts/WishlistContext'
 import { useCart } from '../contexts/CartContext'
 import { Product } from '../types'
@@ -16,7 +15,7 @@ const Wishlist = () => {
     fetchWishlistProducts()
   }, [wishlist])
 
-  const fetchWishlistProducts = async () => {
+  const fetchWishlistProducts = () => {
     if (wishlist.length === 0) {
       setProducts([])
       setLoading(false)
@@ -25,11 +24,9 @@ const Wishlist = () => {
 
     setLoading(true)
     try {
-      const productPromises = wishlist.map(id => getDoc(doc(db, 'products', id)))
-      const productDocs = await Promise.all(productPromises)
-      const productsData = productDocs
-        .filter(doc => doc.exists())
-        .map(doc => ({ id: doc.id, ...doc.data() } as Product))
+      const productsData = wishlist
+        .map(id => getProductById(id))
+        .filter((p): p is Product => p !== undefined)
       setProducts(productsData)
     } catch (error) {
       console.error('Error fetching wishlist products:', error)

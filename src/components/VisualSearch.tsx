@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { collection, getDocs } from 'firebase/firestore'
-import { db } from '../config/firebase'
+import { mockProducts } from '../data/products'
 import { visualSearch } from '../utils/chatbot'
 import type { Product } from '../types'
 
@@ -32,12 +31,8 @@ const VisualSearch = () => {
 
     setSearching(true)
     try {
-      // Fetch all products
-      const productsSnapshot = await getDocs(collection(db, 'products'))
-      const products = productsSnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as Product[]
+      // Use mock products directly
+      const products = mockProducts
 
       // Perform visual search
       const searchResults = await visualSearch(selectedImage, products)

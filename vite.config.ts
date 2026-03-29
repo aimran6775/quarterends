@@ -9,7 +9,6 @@ export default defineConfig({
       output: {
         manualChunks: {
           'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-          'firebase-vendor': ['firebase/app', 'firebase/auth', 'firebase/firestore', 'firebase/storage'],
           'stripe-vendor': ['@stripe/stripe-js', '@stripe/react-stripe-js'],
           'ui-vendor': ['react-helmet-async']
         }
@@ -19,6 +18,6 @@ export default defineConfig({
     sourcemap: false
   },
   optimizeDeps: {
-    include: ['react', 'react-dom', 'react-router-dom', 'firebase/app']
+    include: ['react', 'react-dom', 'react-router-dom']
   }
 })

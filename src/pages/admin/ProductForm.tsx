@@ -1,8 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { collection, addDoc, doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore'
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
-import { db, storage } from '../../config/firebase'
+import { getProductById } from '../../data/products'
 import { Product } from '../../types'
 import { generateProductDescription, generateProductImages, urlToFile } from '../../utils/ai'
 
@@ -44,13 +42,12 @@ const ProductForm = () => {
     }
   }, [id])
 
-  const fetchProduct = async () => {
+  const fetchProduct = () => {
     if (!id) return
     setLoading(true)
     try {
-      const productSnap = await getDoc(doc(db, 'products', id))
-      if (productSnap.exists()) {
-        const data = productSnap.data() as Product
+      const data = getProductById(id)
+      if (data) {
         setFormData({
           name: data.name,
           description: data.description,
@@ -94,13 +91,9 @@ const ProductForm = () => {
     }
   }
 
-  const uploadImages = async (productId: string): Promise<string[]> => {
-    const uploadPromises = images.map(async (file, index) => {
-      const storageRef = ref(storage, `products/${productId}/${Date.now()}_${index}_${file.name}`)
-      const snapshot = await uploadBytes(storageRef, file)
-      return await getDownloadURL(snapshot.ref)
-    })
-    return await Promise.all(uploadPromises)
+  const uploadImages = async (_productId: string): Promise<string[]> => {
+    // Mock: just return object URLs for preview
+    return images.map(file => URL.createObjectURL(file))
   }
 
   const handleSizeToggle = (size: string) => {
@@ -233,34 +226,30 @@ const ProductForm = () => {
         newArrival: formData.newArrival,
         tags: formData.tags,
         images: existingImages,
-        updatedAt: serverTimestamp()
+        updatedAt: new Date().toISOString()
       }
 
       if (id) {
-        // Update existing product
+        // Update existing product (mock)
         if (images.length > 0) {
           setUploading(true)
           const newImageUrls = await uploadImages(id)
           productData.images = [...existingImages, ...newImageUrls]
           setUploading(false)
         }
-        await updateDoc(doc(db, 'products', id), productData)
+        console.log('Product updated:', id, productData)
         alert('Product updated successfully!')
       } else {
-        // Create new product
-        const docRef = await addDoc(collection(db, 'products'), {
-          ...productData,
-          createdAt: serverTimestamp()
-        })
+        // Create new product (mock)
+        const newId = 'prod_' + Math.random().toString(36).substr(2, 9)
         
         if (images.length > 0) {
           setUploading(true)
-          const imageUrls = await uploadImages(docRef.id)
-          await updateDoc(doc(db, 'products', docRef.id), {
-            images: imageUrls
-          })
+          const imageUrls = await uploadImages(newId)
+          productData.images = imageUrls
           setUploading(false)
         }
+        console.log('Product created:', newId, productData)
         alert('Product created successfully!')
       }
       

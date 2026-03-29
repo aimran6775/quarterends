@@ -1,7 +1,5 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
-import { doc, getDoc } from 'firebase/firestore'
-import { db } from '../config/firebase'
 import { formatPrice } from '../utils/payment'
 import type { Order } from '../types'
 
@@ -13,7 +11,7 @@ const OrderConfirmation = () => {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    const fetchOrder = async () => {
+    const fetchOrder = () => {
       if (!orderId) {
         setError('Order ID not found')
         setLoading(false)
@@ -21,19 +19,15 @@ const OrderConfirmation = () => {
       }
 
       try {
-        const orderDoc = await getDoc(doc(db, 'orders', orderId))
+        const orders = JSON.parse(localStorage.getItem('orders') || '[]')
+        const found = orders.find((o: any) => o.id === orderId)
         
-        if (!orderDoc.exists()) {
+        if (!found) {
           setError('Order not found')
           return
         }
 
-        const orderData = {
-          id: orderDoc.id,
-          ...orderDoc.data()
-        } as Order
-
-        setOrder(orderData)
+        setOrder(found as Order)
       } catch (err) {
         console.error('Error fetching order:', err)
         setError('Failed to load order details')
@@ -91,8 +85,8 @@ const OrderConfirmation = () => {
           <div>
             <p className="text-xs text-gray-400 uppercase tracking-wider mb-1">Date</p>
             <p className="text-sm">
-              {order.createdAt?.toDate 
-                ? new Date(order.createdAt.toDate()).toLocaleDateString('en-US', {
+              {order.createdAt
+                ? new Date(order.createdAt as string).toLocaleDateString('en-US', {
                     year: 'numeric', month: 'long', day: 'numeric'
                   })
                 : 'N/A'}

@@ -1,6 +1,4 @@
 import { useState, useEffect } from 'react'
-import { collection, getDocs, doc, updateDoc, query, orderBy } from 'firebase/firestore'
-import { db } from '../../config/firebase'
 import { User, Order } from '../../types'
 
 interface UserWithOrders extends User {
@@ -18,34 +16,10 @@ const CustomersManagement = () => {
     fetchCustomers()
   }, [])
 
-  const fetchCustomers = async () => {
+  const fetchCustomers = () => {
     try {
-      const [usersSnap, ordersSnap] = await Promise.all([
-        getDocs(collection(db, 'users')),
-        getDocs(collection(db, 'orders'))
-      ])
-      
-      const usersData = usersSnap.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as User[]
-
-      const ordersData = ordersSnap.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as Order[]
-
-      // Calculate order stats for each user
-      const usersWithStats = usersData.map(user => {
-        const userOrders = ordersData.filter(order => order.userId === user.id)
-        return {
-          ...user,
-          orderCount: userOrders.length,
-          totalSpent: userOrders.reduce((sum, order) => sum + order.total, 0)
-        }
-      })
-
-      setCustomers(usersWithStats.sort((a, b) => b.orderCount - a.orderCount))
+      // No Firestore - return empty list
+      setCustomers([])
     } catch (error) {
       console.error('Error fetching customers:', error)
     } finally {
@@ -53,35 +27,23 @@ const CustomersManagement = () => {
     }
   }
 
-  const updateUserRole = async (userId: string, role: 'user' | 'admin') => {
+  const updateUserRole = (userId: string, role: 'user' | 'admin') => {
     if (!window.confirm(`Are you sure you want to change this user's role to ${role}?`)) {
       return
     }
-
-    try {
-      await updateDoc(doc(db, 'users', userId), { role })
-      setCustomers(customers.map(customer => 
-        customer.id === userId ? { ...customer, role } : customer
-      ))
-      alert('User role updated successfully')
-    } catch (error) {
-      console.error('Error updating user role:', error)
-      alert('Failed to update user role')
-    }
+    console.log('Update user role:', userId, role)
+    setCustomers(customers.map(customer => 
+      customer.id === userId ? { ...customer, role } : customer
+    ))
+    alert('User role updated successfully')
   }
 
-  const viewCustomerOrders = async (customer: UserWithOrders) => {
+  const viewCustomerOrders = (customer: UserWithOrders) => {
     setSelectedCustomer(customer)
     try {
-      const ordersQuery = query(
-        collection(db, 'orders'),
-        orderBy('createdAt', 'desc')
-      )
-      const ordersSnap = await getDocs(ordersQuery)
-      const ordersData = ordersSnap.docs
-        .map(doc => ({ id: doc.id, ...doc.data() }) as Order)
-        .filter(order => order.userId === customer.id)
-      setCustomerOrders(ordersData)
+      const allOrders = JSON.parse(localStorage.getItem('orders') || '[]') as Order[]
+      const filteredOrders = allOrders.filter((order: any) => order.userId === customer.id)
+      setCustomerOrders(filteredOrders)
     } catch (error) {
       console.error('Error fetching customer orders:', error)
     }
@@ -269,7 +231,7 @@ const CustomersManagement = () => {
                           <p className="font-mono text-sm text-gray-600">#{order.id?.slice(0, 8) || 'N/A'}</p>
                           <p className="text-sm text-gray-500">
                             {order.createdAt 
-                              ? new Date(order.createdAt.seconds * 1000).toLocaleDateString()
+                              ? new Date(order.createdAt as string).toLocaleDateString()
                               : 'N/A'}
                           </p>
                         </div>

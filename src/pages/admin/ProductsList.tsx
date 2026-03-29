@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
-import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore'
-import { db } from '../../config/firebase'
+import { mockProducts } from '../../data/products'
 import { Link } from 'react-router-dom'
 import { Product } from '../../types'
 
@@ -13,14 +12,9 @@ const ProductsList = () => {
     fetchProducts()
   }, [])
 
-  const fetchProducts = async () => {
+  const fetchProducts = () => {
     try {
-      const productsSnap = await getDocs(collection(db, 'products'))
-      const productsData = productsSnap.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as Product[]
-      setProducts(productsData)
+      setProducts([...mockProducts])
     } catch (error) {
       console.error('Error fetching products:', error)
     } finally {
@@ -28,15 +22,10 @@ const ProductsList = () => {
     }
   }
 
-  const handleDelete = async (productId: string) => {
+  const handleDelete = (productId: string) => {
     if (window.confirm('Are you sure you want to delete this product?')) {
-      try {
-        await deleteDoc(doc(db, 'products', productId))
-        setProducts(products.filter(p => p.id !== productId))
-      } catch (error) {
-        console.error('Error deleting product:', error)
-        alert('Failed to delete product')
-      }
+      console.log('Delete product:', productId)
+      setProducts(products.filter(p => p.id !== productId))
     }
   }
 

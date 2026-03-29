@@ -4,8 +4,6 @@ import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js'
 import { useCart } from '../contexts/CartContext'
 import { useAuth } from '../contexts/AuthContext'
 import { calculateOrderAmounts, formatPrice } from '../utils/payment'
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
-import { db } from '../config/firebase'
 import type { Address } from '../types'
 
 const Checkout = () => {
@@ -98,8 +96,10 @@ const Checkout = () => {
       // Create payment intent (in production, this should be done on the backend)
       // For now, we'll simulate the payment and create the order
       
-      // Create order in Firestore
+      // Create order in localStorage
+      const orderId = 'ord_' + Math.random().toString(36).substr(2, 9)
       const orderData = {
+        id: orderId,
         userId: user?.uid || 'guest',
         items: cart.map(item => ({
           productId: item.productId,
@@ -122,17 +122,19 @@ const Checkout = () => {
         },
         paymentStatus: 'paid',
         orderStatus: 'pending',
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
       }
 
-      const orderRef = await addDoc(collection(db, 'orders'), orderData)
+      const existingOrders = JSON.parse(localStorage.getItem('orders') || '[]')
+      existingOrders.push(orderData)
+      localStorage.setItem('orders', JSON.stringify(existingOrders))
 
       // Clear cart after successful order
       await clearCart()
 
       // Navigate to success page
-      navigate(`/order-confirmation/${orderRef.id}`)
+      navigate(`/order-confirmation/${orderId}`)
 
     } catch (err: any) {
       console.error('Payment error:', err)

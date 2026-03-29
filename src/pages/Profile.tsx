@@ -1,7 +1,5 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
-import { doc, getDoc, updateDoc, collection, query, where, orderBy, getDocs } from 'firebase/firestore'
-import { db } from '../config/firebase'
 import { useNavigate, Link } from 'react-router-dom'
 import { formatPrice } from '../utils/payment'
 import type { Order } from '../types'
@@ -35,44 +33,32 @@ const Profile = () => {
   const [activeTab, setActiveTab] = useState<TabType>('profile')
 
   useEffect(() => {
-    const fetchUserData = async () => {
-      if (user) {
-        const userDoc = await getDoc(doc(db, 'users', user.uid))
-        if (userDoc.exists()) {
-          setUserData(userDoc.data() as UserData)
-        }
-      }
-      setLoading(false)
+    if (user) {
+      setUserData({
+        displayName: user.displayName || '',
+        email: user.email || '',
+        phone: '',
+        addresses: []
+      })
     }
-
-    fetchUserData()
+    setLoading(false)
   }, [user])
 
   useEffect(() => {
-    const fetchOrders = async () => {
-      if (user && activeTab === 'orders') {
-        setOrdersLoading(true)
-        try {
-          const ordersQuery = query(
-            collection(db, 'orders'),
-            where('userId', '==', user.uid),
-            orderBy('createdAt', 'desc')
-          )
-          const ordersSnapshot = await getDocs(ordersQuery)
-          const ordersData = ordersSnapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data()
-          })) as Order[]
-          setOrders(ordersData)
-        } catch (error) {
-          console.error('Error fetching orders:', error)
-        } finally {
-          setOrdersLoading(false)
-        }
+    if (user && activeTab === 'orders') {
+      setOrdersLoading(true)
+      try {
+        const allOrders = JSON.parse(localStorage.getItem('orders') || '[]') as Order[]
+        const userOrders = allOrders
+          .filter((o: any) => o.userId === user.uid)
+          .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+        setOrders(userOrders)
+      } catch (error) {
+        console.error('Error fetching orders:', error)
+      } finally {
+        setOrdersLoading(false)
       }
     }
-
-    fetchOrders()
   }, [user, activeTab])
 
   const handleLogout = async () => {
@@ -253,8 +239,8 @@ const Profile = () => {
                             Order #{order.id?.slice(-8).toUpperCase()}
                           </h3>
                           <p className="text-xs text-gray-400 mt-0.5">
-                            {order.createdAt?.toDate
-                              ? new Date(order.createdAt.toDate()).toLocaleDateString('en-US', {
+                            {order.createdAt
+                              ? new Date(order.createdAt as string).toLocaleDateString('en-US', {
                                   year: 'numeric',
                                   month: 'long',
                                   day: 'numeric'

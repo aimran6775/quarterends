@@ -1,7 +1,5 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
-import { doc, getDoc } from 'firebase/firestore'
-import { db } from '../config/firebase'
 import { formatPrice } from '../utils/payment'
 import type { Order } from '../types'
 
@@ -20,7 +18,7 @@ const OrderTracking = () => {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    const fetchOrder = async () => {
+    const fetchOrder = () => {
       if (!orderId) {
         setError('Order ID not found')
         setLoading(false)
@@ -28,19 +26,15 @@ const OrderTracking = () => {
       }
 
       try {
-        const orderDoc = await getDoc(doc(db, 'orders', orderId))
+        const orders = JSON.parse(localStorage.getItem('orders') || '[]')
+        const found = orders.find((o: any) => o.id === orderId)
         
-        if (!orderDoc.exists()) {
+        if (!found) {
           setError('Order not found')
           return
         }
 
-        const orderData = {
-          id: orderDoc.id,
-          ...orderDoc.data()
-        } as Order
-
-        setOrder(orderData)
+        setOrder(found as Order)
       } catch (err) {
         console.error('Error fetching order:', err)
         setError('Failed to load order details')
@@ -54,7 +48,7 @@ const OrderTracking = () => {
 
   const getTrackingSteps = (order: Order): TrackingStep[] => {
     const currentStatus = order.orderStatus || order.status || 'pending'
-    const orderDate = order.createdAt?.toDate ? new Date(order.createdAt.toDate()) : new Date()
+    const orderDate = order.createdAt ? new Date(order.createdAt as string) : new Date()
     
     const steps: TrackingStep[] = [
       {

@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { chatWithAssistant } from '../utils/chatbot'
-import { collection, getDocs } from 'firebase/firestore'
-import { db } from '../config/firebase'
+import { mockProducts } from '../data/products'
 import { useCart } from '../contexts/CartContext'
 import type { Product } from '../types'
 
@@ -27,16 +26,7 @@ const Chatbot = () => {
   const { cart } = useCart()
 
   useEffect(() => {
-    // Fetch products for context
-    const fetchProducts = async () => {
-      const snapshot = await getDocs(collection(db, 'products'))
-      const productsData = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as Product[]
-      setProducts(productsData)
-    }
-    fetchProducts()
+    setProducts(mockProducts)
   }, [])
 
   useEffect(() => {

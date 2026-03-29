@@ -1,7 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useState, useEffect } from 'react'
-import { collection, getDocs, query, where, orderBy, limit } from 'firebase/firestore'
-import { db } from '../config/firebase'
+import { getFeaturedProducts, getNewArrivals } from '../data/products'
 import { Product } from '../types'
 import SEO from '../components/SEO'
 
@@ -14,32 +13,10 @@ const Home = () => {
     fetchProducts()
   }, [])
 
-  const fetchProducts = async () => {
+  const fetchProducts = () => {
     try {
-      const featuredQuery = query(
-        collection(db, 'products'),
-        where('featured', '==', true),
-        limit(4)
-      )
-      const featuredSnap = await getDocs(featuredQuery)
-      const featured = featuredSnap.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as Product[]
-      setFeaturedProducts(featured)
-
-      const newQuery = query(
-        collection(db, 'products'),
-        where('newArrival', '==', true),
-        orderBy('createdAt', 'desc'),
-        limit(4)
-      )
-      const newSnap = await getDocs(newQuery)
-      const newItems = newSnap.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as Product[]
-      setNewArrivals(newItems)
+      setFeaturedProducts(getFeaturedProducts().slice(0, 4))
+      setNewArrivals(getNewArrivals().slice(0, 4))
     } catch (error) {
       console.error('Error fetching products:', error)
     } finally {

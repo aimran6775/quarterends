@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
-import { collection, getDocs, query, where, orderBy, limit } from 'firebase/firestore'
-import { db } from '../../config/firebase'
+import { mockProducts } from '../../data/products'
 import { Link } from 'react-router-dom'
 
 const AdminDashboard = () => {
@@ -14,32 +13,22 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const fetchDashboardData = async () => {
+    const fetchDashboardData = () => {
       try {
-        // Fetch products count
-        const productsSnap = await getDocs(collection(db, 'products'))
-        const totalProducts = productsSnap.size
+        const totalProducts = mockProducts.length
 
-        // Fetch orders
-        const ordersSnap = await getDocs(collection(db, 'orders'))
-        const totalOrders = ordersSnap.size
-        const totalRevenue = ordersSnap.docs.reduce((sum, doc) => sum + (doc.data().total || 0), 0)
+        const orders = JSON.parse(localStorage.getItem('orders') || '[]')
+        const totalOrders = orders.length
+        const totalRevenue = orders.reduce((sum: number, o: any) => sum + (o.total || 0), 0)
 
-        // Fetch customers count
-        const usersSnap = await getDocs(query(collection(db, 'users'), where('role', '==', 'user')))
-        const totalCustomers = usersSnap.size
+        const totalCustomers = 0
 
-        // Fetch recent orders
-        const recentOrdersQuery = query(
-          collection(db, 'orders'),
-          orderBy('createdAt', 'desc'),
-          limit(5)
-        )
-        const recentOrdersSnap = await getDocs(recentOrdersQuery)
-        const orders = recentOrdersSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+        const recent = orders
+          .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+          .slice(0, 5)
 
         setStats({ totalProducts, totalOrders, totalRevenue, totalCustomers })
-        setRecentOrders(orders)
+        setRecentOrders(recent)
       } catch (error) {
         console.error('Error fetching dashboard data:', error)
       } finally {

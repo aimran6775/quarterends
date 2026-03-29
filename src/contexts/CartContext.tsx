@@ -1,6 +1,4 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
-import { doc, getDoc, setDoc, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore'
-import { db } from '../config/firebase'
 import { useAuth } from './AuthContext'
 import { CartItem } from '../types'
 
@@ -31,49 +29,19 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (user) {
-      fetchCart()
-    } else {
-      // Load cart from localStorage for non-authenticated users
-      const localCart = localStorage.getItem('cart')
-      if (localCart) {
+    const localCart = localStorage.getItem('cart')
+    if (localCart) {
+      try {
         setCart(JSON.parse(localCart))
+      } catch (e) {
+        console.error('Error parsing cart from localStorage:', e)
       }
-      setLoading(false)
     }
+    setLoading(false)
   }, [user])
 
-  const fetchCart = async () => {
-    if (!user) return
-    setLoading(true)
-    try {
-      const cartDoc = await getDoc(doc(db, 'carts', user.uid))
-      if (cartDoc.exists()) {
-        setCart(cartDoc.data().items || [])
-      } else {
-        setCart([])
-      }
-    } catch (error) {
-      console.error('Error fetching cart:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const saveCart = async (items: CartItem[]) => {
-    if (user) {
-      try {
-        await setDoc(doc(db, 'carts', user.uid), {
-          userId: user.uid,
-          items,
-          updatedAt: new Date().toISOString()
-        })
-      } catch (error) {
-        console.error('Error saving cart:', error)
-      }
-    } else {
-      localStorage.setItem('cart', JSON.stringify(items))
-    }
+  const saveCart = (items: CartItem[]) => {
+    localStorage.setItem('cart', JSON.stringify(items))
   }
 
   const addToCart = async (newItem: CartItem) => {
