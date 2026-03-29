@@ -1,4 +1,4 @@
-import { openai, OPENAI_MODELS } from '../config/openai'
+import { getOpenAI, OPENAI_MODELS } from '../config/openai'
 import type { Product } from '../types'
 
 /**
@@ -28,7 +28,10 @@ Write a description that:
 
 Keep it classy and refined.`
 
-    const response = await openai.chat.completions.create({
+    const client = await getOpenAI()
+    if (!client) return 'Premium quality product crafted with attention to detail.'
+
+    const response = await client.chat.completions.create({
       model: OPENAI_MODELS.GPT35_TURBO,
       messages: [
         {
@@ -94,7 +97,10 @@ Recommend exactly 4 products that would complement or appeal to someone interest
 
 Return ONLY a JSON array of product IDs, like: ["id1", "id2", "id3", "id4"]`
 
-    const response = await openai.chat.completions.create({
+    const client = await getOpenAI()
+    if (!client) return fallbackRecommendations(currentProduct, candidates)
+
+    const response = await client.chat.completions.create({
       model: OPENAI_MODELS.GPT35_TURBO,
       messages: [
         {
@@ -261,7 +267,10 @@ Generate:
 
 Return as JSON: { "title": "...", "metaDescription": "..." }`
 
-    const response = await openai.chat.completions.create({
+    const client = await getOpenAI()
+    if (!client) return { title: `${product.name} - Quarterends`, metaDescription: product.description.slice(0, 160) }
+
+    const response = await client.chat.completions.create({
       model: OPENAI_MODELS.GPT35_TURBO,
       messages: [
         {
@@ -308,7 +317,10 @@ export const generateProductImages = async (
 High-end luxury fashion photography style, clean white background, studio lighting, 
 professional model wearing the product, elegant pose, high resolution, magazine quality.`
 
-    const response = await openai.images.generate({
+    const client = await getOpenAI()
+    if (!client) throw new Error('AI not available')
+
+    const response = await client.images.generate({
       model: "dall-e-3",
       prompt: prompt,
       n: 1, // DALL-E 3 only supports n=1
@@ -324,7 +336,7 @@ professional model wearing the product, elegant pose, high resolution, magazine 
     // For multiple images, we'll need to call multiple times
     if (count > 1) {
       const additionalPromises = Array.from({ length: count - 1 }, (_, i) => 
-        openai.images.generate({
+        client.images.generate({
           model: "dall-e-3",
           prompt: `${prompt} Variation ${i + 2}: different angle or styling.`,
           n: 1,

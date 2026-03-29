@@ -1,4 +1,4 @@
-import { openai, OPENAI_MODELS } from '../config/openai'
+import { getOpenAI, OPENAI_MODELS } from '../config/openai'
 import type { Product } from '../types'
 
 /**
@@ -32,7 +32,10 @@ Guidelines:
 - For order/account issues, suggest contacting customer support
 - Recommend products when relevant`
 
-    const response = await openai.chat.completions.create({
+    const client = await getOpenAI()
+    if (!client) return 'AI features are currently unavailable. Please try again later or contact our support team.'
+
+    const response = await client.chat.completions.create({
       model: OPENAI_MODELS.GPT35_TURBO,
       messages: [
         { role: 'system', content: systemPrompt },
@@ -77,7 +80,10 @@ Provide a structured JSON response:
   "material": "..."
 }`
 
-    const response = await openai.chat.completions.create({
+    const client = await getOpenAI()
+    if (!client) throw new Error('AI not available')
+
+    const response = await client.chat.completions.create({
       model: OPENAI_MODELS.GPT4_VISION,
       messages: [
         {
@@ -169,7 +175,10 @@ ${products.map(p => `ID: ${p.id}, Name: ${p.name}, Category: ${p.category}, Tags
 
 Return ONLY a JSON array of product IDs: ["id1", "id2", "id3", "id4"]`
 
-    const response = await openai.chat.completions.create({
+    const client = await getOpenAI()
+    if (!client) return products.slice(0, 4)
+
+    const response = await client.chat.completions.create({
       model: OPENAI_MODELS.GPT35_TURBO,
       messages: [
         {
