@@ -4,14 +4,14 @@ import { loadStripe, Stripe } from '@stripe/stripe-js'
 const stripePublicKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 
 if (!stripePublicKey) {
-  throw new Error('Stripe publishable key is not defined in environment variables')
+  console.warn('Stripe publishable key is not defined in environment variables. Payments will not work.')
 }
 
 let stripePromise: Promise<Stripe | null>
 
 export const getStripe = () => {
   if (!stripePromise) {
-    stripePromise = loadStripe(stripePublicKey)
+    stripePromise = stripePublicKey ? loadStripe(stripePublicKey) : Promise.resolve(null)
   }
   return stripePromise
 }

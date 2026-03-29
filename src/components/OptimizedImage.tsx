@@ -25,9 +25,9 @@ export default function OptimizedImage({
 
   return (
     <div className={`relative overflow-hidden ${className}`}>
-      {/* Blur placeholder while loading */}
+      {/* Minimal placeholder while loading */}
       {!isLoaded && !error && (
-        <div className="absolute inset-0 bg-gray-100 animate-pulse" />
+        <div className="absolute inset-0 bg-gray-50" />
       )}
       
       <img

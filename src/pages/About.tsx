@@ -1,20 +1,22 @@
 const About = () => {
   return (
-    <div className="bg-white">
+    <div className="bg-white pt-24">
       {/* Hero */}
-      <section className="relative h-96 flex items-center justify-center">
-        <div className="absolute inset-0 bg-gray-200 flex items-center justify-center">
-          <p className="text-gray-400 text-sm">[About Hero Image: Studio or lifestyle shot]</p>
-        </div>
-        <h1 className="relative z-10 text-5xl md:text-6xl font-serif font-bold text-gray-900">
+      <section className="max-w-2xl mx-auto px-6 py-16 text-center">
+        <h1 className="text-3xl font-medium tracking-tight text-gray-900">
           About Quarterends
         </h1>
+        <p className="mt-3 text-sm text-gray-400">
+          Timeless fashion, thoughtfully curated
+        </p>
       </section>
 
+      <div className="border-t border-gray-100" />
+
       {/* Story */}
-      <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <h2 className="text-3xl md:text-4xl font-serif font-bold mb-6">Our Story</h2>
-        <div className="space-y-4 text-lg text-gray-700 leading-relaxed">
+      <section className="max-w-2xl mx-auto px-6 py-16">
+        <p className="text-xs text-gray-400 uppercase tracking-wider mb-4">Our Story</p>
+        <div className="space-y-4 text-sm text-gray-500 leading-relaxed">
           <p>
             Founded in 2020, Quarterends emerged from a simple belief: that luxury fashion 
             should be timeless, sustainable, and accessible to those who appreciate quality craftsmanship.
@@ -32,47 +34,47 @@ const About = () => {
         </div>
       </section>
 
+      <div className="border-t border-gray-100" />
+
       {/* Values */}
-      <section className="bg-gray-50 py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl md:text-4xl font-serif font-bold text-center mb-12">Our Values</h2>
-          
-          <div className="grid md:grid-cols-3 gap-8">
-            {[
-              {
-                title: 'Quality',
-                desc: 'We never compromise on materials or craftsmanship. Every piece is made to last.'
-              },
-              {
-                title: 'Sustainability',
-                desc: 'We prioritize eco-friendly materials and ethical production practices.'
-              },
-              {
-                title: 'Timelessness',
-                desc: 'Our designs transcend trends, offering elegance that endures season after season.'
-              }
-            ].map((value) => (
-              <div key={value.title} className="bg-white rounded-lg p-8 text-center">
-                <h3 className="text-xl font-semibold mb-4">{value.title}</h3>
-                <p className="text-gray-700">{value.desc}</p>
-              </div>
-            ))}
-          </div>
+      <section className="max-w-2xl mx-auto px-6 py-16">
+        <p className="text-xs text-gray-400 uppercase tracking-wider mb-8">Our Values</p>
+        
+        <div className="grid md:grid-cols-3 gap-10">
+          {[
+            {
+              title: 'Quality',
+              desc: 'We never compromise on materials or craftsmanship. Every piece is made to last.'
+            },
+            {
+              title: 'Sustainability',
+              desc: 'We prioritize eco-friendly materials and ethical production practices.'
+            },
+            {
+              title: 'Timelessness',
+              desc: 'Our designs transcend trends, offering elegance that endures season after season.'
+            }
+          ].map((value) => (
+            <div key={value.title}>
+              <h3 className="text-sm font-medium text-gray-900 mb-2">{value.title}</h3>
+              <p className="text-sm text-gray-400 leading-relaxed">{value.desc}</p>
+            </div>
+          ))}
         </div>
       </section>
 
+      <div className="border-t border-gray-100" />
+
       {/* Team */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <h2 className="text-3xl md:text-4xl font-serif font-bold text-center mb-12">Meet Our Team</h2>
+      <section className="max-w-2xl mx-auto px-6 py-16">
+        <p className="text-xs text-gray-400 uppercase tracking-wider mb-8">Our Team</p>
         
-        <div className="grid md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           {[1, 2, 3, 4].map((member) => (
             <div key={member} className="text-center">
-              <div className="aspect-square bg-gray-200 rounded-full mb-4 flex items-center justify-center mx-auto">
-                <p className="text-gray-400 text-xs">[Team {member}]</p>
-              </div>
-              <h3 className="font-semibold text-lg mb-1">Team Member {member}</h3>
-              <p className="text-gray-600 text-sm">Position</p>
+              <div className="w-16 h-16 bg-gray-100 rounded-full mb-3 mx-auto" />
+              <p className="text-sm font-medium text-gray-900">Team Member {member}</p>
+              <p className="text-xs text-gray-400 mt-0.5">Position</p>
             </div>
           ))}
         </div>

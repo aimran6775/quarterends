@@ -111,63 +111,60 @@ const Chatbot = () => {
       {/* Chat Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all ${
-          isOpen ? 'bg-gray-800' : 'bg-gray-900 hover:bg-gray-800'
+        className={`fixed bottom-6 right-6 z-50 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
+          isOpen
+            ? 'bg-gray-200 hover:bg-gray-300'
+            : 'bg-gray-900 hover:bg-gray-700 shadow-sm'
         }`}
         aria-label="Open chat"
       >
         {isOpen ? (
-          <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
           </svg>
         ) : (
-          <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+          <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
           </svg>
         )}
       </button>
 
       {/* Chat Window */}
       {isOpen && (
-        <div className="fixed bottom-24 right-6 z-50 w-96 h-[600px] bg-white rounded-lg shadow-2xl flex flex-col border border-gray-200">
+        <div className="fixed bottom-20 right-6 z-50 w-80 h-[480px] bg-white flex flex-col border border-gray-100 shadow-sm animate-fade-in">
           {/* Header */}
-          <div className="bg-gray-900 text-white p-4 rounded-t-lg flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
-                <span className="text-2xl">🤖</span>
-              </div>
-              <div>
-                <h3 className="font-semibold">Shopping Assistant</h3>
-                <p className="text-xs text-gray-300">Always here to help</p>
-              </div>
+          <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+            <div>
+              <h3 className="text-sm font-medium">Assistant</h3>
+              <p className="text-[10px] text-gray-400 mt-0.5">Online</p>
             </div>
             <button
               onClick={() => setIsOpen(false)}
-              className="text-gray-300 hover:text-white"
+              className="text-gray-300 hover:text-gray-900 transition-colors"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
           </div>
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          <div className="flex-1 overflow-y-auto px-5 py-4 space-y-3">
             {messages.map((message, index) => (
               <div
                 key={index}
                 className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 <div
-                  className={`max-w-[80%] rounded-lg px-4 py-2 ${
+                  className={`max-w-[80%] px-3 py-2 ${
                     message.role === 'user'
                       ? 'bg-gray-900 text-white'
-                      : 'bg-gray-100 text-gray-900'
+                      : 'bg-gray-50 text-gray-700'
                   }`}
                 >
-                  <p className="text-sm">{message.content}</p>
-                  <p className={`text-xs mt-1 ${
-                    message.role === 'user' ? 'text-gray-300' : 'text-gray-500'
+                  <p className="text-xs leading-relaxed">{message.content}</p>
+                  <p className={`text-[10px] mt-1 ${
+                    message.role === 'user' ? 'text-gray-400' : 'text-gray-300'
                   }`}>
                     {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </p>
@@ -176,11 +173,11 @@ const Chatbot = () => {
             ))}
             {isLoading && (
               <div className="flex justify-start">
-                <div className="bg-gray-100 rounded-lg px-4 py-2">
+                <div className="bg-gray-50 px-3 py-2">
                   <div className="flex gap-1">
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+                    <div className="w-1 h-1 bg-gray-300 rounded-full animate-bounce"></div>
+                    <div className="w-1 h-1 bg-gray-300 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                    <div className="w-1 h-1 bg-gray-300 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
                   </div>
                 </div>
               </div>
@@ -190,9 +187,8 @@ const Chatbot = () => {
 
           {/* Quick Questions */}
           {messages.length === 1 && (
-            <div className="px-4 pb-2">
-              <p className="text-xs text-gray-500 mb-2">Quick questions:</p>
-              <div className="flex flex-wrap gap-2">
+            <div className="px-5 pb-2">
+              <div className="flex flex-wrap gap-1.5">
                 {quickQuestions.map((question, index) => (
                   <button
                     key={index}
@@ -200,7 +196,7 @@ const Chatbot = () => {
                       setInput(question)
                       setTimeout(() => handleSend(), 100)
                     }}
-                    className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1 rounded-full transition"
+                    className="text-[10px] text-gray-400 border border-gray-100 px-2.5 py-1 hover:text-gray-900 hover:border-gray-300 transition-colors"
                   >
                     {question}
                   </button>
@@ -210,24 +206,24 @@ const Chatbot = () => {
           )}
 
           {/* Input */}
-          <div className="p-4 border-t border-gray-200">
+          <div className="px-5 py-3 border-t border-gray-100">
             <div className="flex gap-2">
               <input
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder="Type your message..."
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 text-sm"
+                placeholder="Type a message..."
+                className="flex-1 px-0 py-1 border-0 border-b border-gray-100 focus:border-gray-900 focus:outline-none focus:ring-0 text-xs text-gray-900 placeholder:text-gray-300 bg-transparent transition-colors"
                 disabled={isLoading}
               />
               <button
                 onClick={handleSend}
                 disabled={!input.trim() || isLoading}
-                className="bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                className="text-gray-400 hover:text-gray-900 transition-colors disabled:opacity-30"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 12h14M12 5l7 7-7 7" />
                 </svg>
               </button>
             </div>
