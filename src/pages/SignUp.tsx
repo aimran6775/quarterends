@@ -1,6 +1,11 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import { useAuth } from '../contexts/AuthContext'
+import MagneticButton from '../components/3d/MagneticButton'
+import GradientBlob from '../components/3d/GradientBlob'
+
+const ease = [0.16, 1, 0.3, 1]
 
 const SignUp = () => {
   const [name, setName] = useState('')
@@ -49,24 +54,52 @@ const SignUp = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-6">
-      <div className="max-w-sm w-full">
+    <div className="relative min-h-screen flex items-center justify-center px-6">
+      <GradientBlob className="absolute top-1/4 left-1/4 w-96 h-96 opacity-10" />
+
+      <motion.div
+        className="max-w-sm w-full"
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease }}
+      >
         <div className="mb-8">
-          <h2 className="text-xl font-medium tracking-tight text-center text-gray-900">
+          <motion.h2
+            className="text-xl font-medium tracking-tight text-center text-gray-900"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, ease }}
+          >
             Create account
-          </h2>
-          <p className="mt-1 text-sm text-gray-400 text-center">
+          </motion.h2>
+          <motion.p
+            className="mt-1 text-sm text-gray-400 text-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.1, duration: 0.4, ease }}
+          >
             Join Quarterends today
-          </p>
+          </motion.p>
         </div>
 
         {error && (
-          <p className="text-sm text-red-500 mb-4">{error}</p>
+          <motion.p
+            className="text-sm text-red-500 mb-4"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            transition={{ duration: 0.3, ease }}
+          >
+            {error}
+          </motion.p>
         )}
 
         <form className="space-y-5" onSubmit={handleSubmit}>
           <div className="space-y-4">
-            <div>
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.05, duration: 0.4, ease }}
+            >
               <label htmlFor="name" className="block text-xs text-gray-400 uppercase tracking-wider mb-1.5">
                 Full Name
               </label>
@@ -79,9 +112,13 @@ const SignUp = () => {
                 className="w-full px-3 py-2.5 border border-gray-200 focus:border-gray-900 focus:outline-none text-sm transition-colors"
                 placeholder="John Doe"
               />
-            </div>
+            </motion.div>
 
-            <div>
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1, duration: 0.4, ease }}
+            >
               <label htmlFor="email" className="block text-xs text-gray-400 uppercase tracking-wider mb-1.5">
                 Email
               </label>
@@ -94,9 +131,13 @@ const SignUp = () => {
                 className="w-full px-3 py-2.5 border border-gray-200 focus:border-gray-900 focus:outline-none text-sm transition-colors"
                 placeholder="you@example.com"
               />
-            </div>
+            </motion.div>
 
-            <div>
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15, duration: 0.4, ease }}
+            >
               <label htmlFor="password" className="block text-xs text-gray-400 uppercase tracking-wider mb-1.5">
                 Password
               </label>
@@ -109,9 +150,13 @@ const SignUp = () => {
                 className="w-full px-3 py-2.5 border border-gray-200 focus:border-gray-900 focus:outline-none text-sm transition-colors"
                 placeholder="••••••••"
               />
-            </div>
+            </motion.div>
 
-            <div>
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2, duration: 0.4, ease }}
+            >
               <label htmlFor="confirmPassword" className="block text-xs text-gray-400 uppercase tracking-wider mb-1.5">
                 Confirm Password
               </label>
@@ -124,31 +169,40 @@ const SignUp = () => {
                 className="w-full px-3 py-2.5 border border-gray-200 focus:border-gray-900 focus:outline-none text-sm transition-colors"
                 placeholder="••••••••"
               />
-            </div>
+            </motion.div>
           </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-gray-900 text-white py-2.5 text-sm hover:bg-gray-800 transition-colors disabled:opacity-50"
-          >
-            {loading ? 'Creating account...' : 'Create Account'}
-          </button>
+          <MagneticButton>
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-gray-900 text-white py-2.5 text-sm hover:bg-gray-800 transition-colors disabled:opacity-50"
+            >
+              {loading ? 'Creating account...' : 'Create Account'}
+            </button>
+          </MagneticButton>
         </form>
 
-        <div className="relative my-6">
+        <motion.div
+          className="relative my-6"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3, duration: 0.4, ease }}
+        >
           <div className="absolute inset-0 flex items-center">
             <div className="w-full border-t border-gray-100" />
           </div>
           <div className="relative flex justify-center">
             <span className="px-3 bg-white text-xs text-gray-300">or</span>
           </div>
-        </div>
+        </motion.div>
 
-        <button
+        <motion.button
           onClick={handleGoogleSignIn}
           disabled={loading}
           className="w-full flex items-center justify-center gap-2 border border-gray-200 py-2.5 text-sm text-gray-600 hover:border-gray-300 transition-colors disabled:opacity-50"
+          whileHover={{ scale: 1.02, borderColor: '#111' }}
+          whileTap={{ scale: 0.98 }}
         >
           <svg className="w-4 h-4" viewBox="0 0 24 24">
             <path
@@ -169,7 +223,7 @@ const SignUp = () => {
             />
           </svg>
           Google
-        </button>
+        </motion.button>
 
         <p className="text-center text-xs text-gray-400 mt-6">
           Already have an account?{' '}
@@ -177,7 +231,7 @@ const SignUp = () => {
             Sign in
           </Link>
         </p>
-      </div>
+      </motion.div>
     </div>
   )
 }

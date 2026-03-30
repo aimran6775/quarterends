@@ -10,11 +10,13 @@ export default defineConfig({
         manualChunks: {
           'react-vendor': ['react', 'react-dom', 'react-router-dom'],
           'stripe-vendor': ['@stripe/stripe-js', '@stripe/react-stripe-js'],
-          'ui-vendor': ['react-helmet-async']
+          'ui-vendor': ['react-helmet-async'],
+          'three-vendor': ['three', '@react-three/fiber', '@react-three/drei'],
+          'animation-vendor': ['framer-motion', 'gsap']
         }
       }
     },
-    chunkSizeWarningLimit: 1000,
+    chunkSizeWarningLimit: 1200,
     sourcemap: false
   },
   optimizeDeps: {

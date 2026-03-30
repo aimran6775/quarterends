@@ -1,9 +1,13 @@
 import { useState, FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { motion, AnimatePresence } from 'framer-motion'
 import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js'
 import { useCart } from '../contexts/CartContext'
 import { useAuth } from '../contexts/AuthContext'
 import { calculateOrderAmounts, formatPrice } from '../utils/payment'
+import ScrollReveal from '../components/3d/ScrollReveal'
+import AnimatedText from '../components/3d/AnimatedText'
+import MagneticButton from '../components/3d/MagneticButton'
 import type { Address } from '../types'
 
 const Checkout = () => {
@@ -147,7 +151,12 @@ const Checkout = () => {
   if (cart.length === 0) {
     return (
       <div className="max-w-6xl mx-auto px-6 pt-24 pb-16">
-        <div className="text-center py-20">
+        <motion.div
+          className="text-center py-20"
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5 }}
+        >
           <p className="text-sm text-gray-400 mb-3">Nothing here yet</p>
           <h1 className="text-2xl font-medium tracking-tight mb-6">Your cart is empty</h1>
           <button
@@ -156,7 +165,7 @@ const Checkout = () => {
           >
             Continue Shopping
           </button>
-        </div>
+        </motion.div>
       </div>
     )
   }
@@ -166,266 +175,392 @@ const Checkout = () => {
     { num: 2, label: 'Payment' }
   ]
 
+  const shippingFields = [
+    {
+      type: 'row',
+      fields: [
+        { label: 'First Name *', type: 'text', required: true, value: shippingInfo.firstName, key: 'firstName' },
+        { label: 'Last Name *', type: 'text', required: true, value: shippingInfo.lastName, key: 'lastName' }
+      ]
+    },
+    { label: 'Email *', type: 'email', required: true, value: shippingInfo.email, key: 'email' },
+    { label: 'Phone', type: 'tel', required: false, value: shippingInfo.phone, key: 'phone' },
+    { label: 'Street Address *', type: 'text', required: true, value: shippingInfo.street, key: 'street' },
+    {
+      type: 'row',
+      fields: [
+        { label: 'City *', type: 'text', required: true, value: shippingInfo.city, key: 'city' },
+        { label: 'State / Province', type: 'text', required: false, value: shippingInfo.state, key: 'state' }
+      ]
+    },
+    {
+      type: 'row',
+      fields: [
+        { label: 'ZIP Code *', type: 'text', required: true, value: shippingInfo.zipCode, key: 'zipCode' },
+        { label: 'Country *', type: 'select', required: true, value: shippingInfo.country, key: 'country' }
+      ]
+    }
+  ]
+
   return (
     <div className="max-w-6xl mx-auto px-6 pt-24 pb-16">
-      <h1 className="text-2xl font-medium tracking-tight mb-10">Checkout</h1>
+      <AnimatedText text="Checkout" tag="h1" className="text-2xl font-medium tracking-tight mb-10" />
       
       {/* Progress Steps */}
       <div className="flex items-center justify-center mb-12">
         {steps.map((s, idx) => (
           <div key={s.num} className="flex items-center">
             <div className="flex flex-col items-center">
-              <div className={`w-2 h-2 rounded-full transition-colors ${
-                step >= s.num ? 'bg-gray-900' : 'bg-gray-200'
-              }`} />
+              <motion.div
+                className={`w-2 h-2 rounded-full transition-colors ${
+                  step >= s.num ? 'bg-gray-900' : 'bg-gray-200'
+                }`}
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: idx * 0.15, type: 'spring', stiffness: 300 }}
+              />
               <span className="text-xs text-gray-400 mt-2">{s.label}</span>
             </div>
             {idx < steps.length - 1 && (
-              <div className={`w-20 h-px mx-6 transition-colors ${
-                step > s.num ? 'bg-gray-900' : 'bg-gray-200'
-              }`} />
+              <motion.div
+                className={`w-20 h-px mx-6 origin-left ${
+                  step > s.num ? 'bg-gray-900' : 'bg-gray-200'
+                }`}
+                initial={{ scaleX: 0 }}
+                animate={{ scaleX: step > s.num ? 1 : 0 }}
+                transition={{ duration: 0.4, ease: 'easeInOut' }}
+              />
             )}
           </div>
         ))}
       </div>
 
-      {error && (
-        <p className="text-sm text-red-500 mb-6">{error}</p>
-      )}
+      <AnimatePresence>
+        {error && (
+          <motion.p
+            className="text-sm text-red-500 mb-6"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            {error}
+          </motion.p>
+        )}
+      </AnimatePresence>
 
       <div className="grid lg:grid-cols-3 gap-12">
         {/* Checkout Form */}
         <div className="lg:col-span-2">
-          {step === 1 && (
-            <div className="border border-gray-100 p-6">
-              <h2 className="text-lg font-medium mb-6">Shipping Information</h2>
-              
-              <form onSubmit={handleShippingSubmit} className="space-y-5">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs text-gray-400 uppercase tracking-wider mb-1.5">First Name *</label>
+          <AnimatePresence mode="wait">
+            {step === 1 && (
+              <motion.div
+                key={1}
+                className="border border-gray-100 p-6"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                transition={{ duration: 0.35 }}
+              >
+                <h2 className="text-lg font-medium mb-6">Shipping Information</h2>
+                
+                <form onSubmit={handleShippingSubmit} className="space-y-5">
+                  <motion.div
+                    className="grid grid-cols-2 gap-4"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0 * 0.05, duration: 0.3 }}
+                  >
+                    <div>
+                      <label className="block text-xs text-gray-400 uppercase tracking-wider mb-1.5">First Name *</label>
+                      <input 
+                        type="text" 
+                        required
+                        value={shippingInfo.firstName}
+                        onChange={(e) => setShippingInfo({...shippingInfo, firstName: e.target.value})}
+                        className="w-full border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:border-gray-900 transition-colors" 
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-400 uppercase tracking-wider mb-1.5">Last Name *</label>
+                      <input 
+                        type="text" 
+                        required
+                        value={shippingInfo.lastName}
+                        onChange={(e) => setShippingInfo({...shippingInfo, lastName: e.target.value})}
+                        className="w-full border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:border-gray-900 transition-colors" 
+                      />
+                    </div>
+                  </motion.div>
+
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 1 * 0.05, duration: 0.3 }}
+                  >
+                    <label className="block text-xs text-gray-400 uppercase tracking-wider mb-1.5">Email *</label>
+                    <input 
+                      type="email" 
+                      required
+                      value={shippingInfo.email}
+                      onChange={(e) => setShippingInfo({...shippingInfo, email: e.target.value})}
+                      className="w-full border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:border-gray-900 transition-colors" 
+                    />
+                  </motion.div>
+
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 2 * 0.05, duration: 0.3 }}
+                  >
+                    <label className="block text-xs text-gray-400 uppercase tracking-wider mb-1.5">Phone</label>
+                    <input 
+                      type="tel"
+                      value={shippingInfo.phone}
+                      onChange={(e) => setShippingInfo({...shippingInfo, phone: e.target.value})}
+                      className="w-full border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:border-gray-900 transition-colors" 
+                    />
+                  </motion.div>
+
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 3 * 0.05, duration: 0.3 }}
+                  >
+                    <label className="block text-xs text-gray-400 uppercase tracking-wider mb-1.5">Street Address *</label>
                     <input 
                       type="text" 
                       required
-                      value={shippingInfo.firstName}
-                      onChange={(e) => setShippingInfo({...shippingInfo, firstName: e.target.value})}
+                      value={shippingInfo.street}
+                      onChange={(e) => setShippingInfo({...shippingInfo, street: e.target.value})}
                       className="w-full border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:border-gray-900 transition-colors" 
                     />
-                  </div>
-                  <div>
-                    <label className="block text-xs text-gray-400 uppercase tracking-wider mb-1.5">Last Name *</label>
-                    <input 
-                      type="text" 
-                      required
-                      value={shippingInfo.lastName}
-                      onChange={(e) => setShippingInfo({...shippingInfo, lastName: e.target.value})}
-                      className="w-full border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:border-gray-900 transition-colors" 
-                    />
-                  </div>
-                </div>
+                  </motion.div>
 
-                <div>
-                  <label className="block text-xs text-gray-400 uppercase tracking-wider mb-1.5">Email *</label>
-                  <input 
-                    type="email" 
-                    required
-                    value={shippingInfo.email}
-                    onChange={(e) => setShippingInfo({...shippingInfo, email: e.target.value})}
-                    className="w-full border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:border-gray-900 transition-colors" 
-                  />
-                </div>
+                  <motion.div
+                    className="grid grid-cols-2 gap-4"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 4 * 0.05, duration: 0.3 }}
+                  >
+                    <div>
+                      <label className="block text-xs text-gray-400 uppercase tracking-wider mb-1.5">City *</label>
+                      <input 
+                        type="text" 
+                        required
+                        value={shippingInfo.city}
+                        onChange={(e) => setShippingInfo({...shippingInfo, city: e.target.value})}
+                        className="w-full border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:border-gray-900 transition-colors" 
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-400 uppercase tracking-wider mb-1.5">State / Province</label>
+                      <input 
+                        type="text"
+                        value={shippingInfo.state}
+                        onChange={(e) => setShippingInfo({...shippingInfo, state: e.target.value})}
+                        className="w-full border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:border-gray-900 transition-colors" 
+                      />
+                    </div>
+                  </motion.div>
 
-                <div>
-                  <label className="block text-xs text-gray-400 uppercase tracking-wider mb-1.5">Phone</label>
-                  <input 
-                    type="tel"
-                    value={shippingInfo.phone}
-                    onChange={(e) => setShippingInfo({...shippingInfo, phone: e.target.value})}
-                    className="w-full border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:border-gray-900 transition-colors" 
-                  />
-                </div>
+                  <motion.div
+                    className="grid grid-cols-2 gap-4"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 5 * 0.05, duration: 0.3 }}
+                  >
+                    <div>
+                      <label className="block text-xs text-gray-400 uppercase tracking-wider mb-1.5">ZIP Code *</label>
+                      <input 
+                        type="text" 
+                        required
+                        value={shippingInfo.zipCode}
+                        onChange={(e) => setShippingInfo({...shippingInfo, zipCode: e.target.value})}
+                        className="w-full border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:border-gray-900 transition-colors" 
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-400 uppercase tracking-wider mb-1.5">Country *</label>
+                      <select 
+                        value={shippingInfo.country}
+                        onChange={(e) => setShippingInfo({...shippingInfo, country: e.target.value})}
+                        className="w-full border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:border-gray-900 transition-colors bg-white"
+                      >
+                        <option>United States</option>
+                        <option>Canada</option>
+                      </select>
+                    </div>
+                  </motion.div>
 
-                <div>
-                  <label className="block text-xs text-gray-400 uppercase tracking-wider mb-1.5">Street Address *</label>
-                  <input 
-                    type="text" 
-                    required
-                    value={shippingInfo.street}
-                    onChange={(e) => setShippingInfo({...shippingInfo, street: e.target.value})}
-                    className="w-full border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:border-gray-900 transition-colors" 
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs text-gray-400 uppercase tracking-wider mb-1.5">City *</label>
-                    <input 
-                      type="text" 
-                      required
-                      value={shippingInfo.city}
-                      onChange={(e) => setShippingInfo({...shippingInfo, city: e.target.value})}
-                      className="w-full border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:border-gray-900 transition-colors" 
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs text-gray-400 uppercase tracking-wider mb-1.5">State / Province</label>
-                    <input 
-                      type="text"
-                      value={shippingInfo.state}
-                      onChange={(e) => setShippingInfo({...shippingInfo, state: e.target.value})}
-                      className="w-full border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:border-gray-900 transition-colors" 
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs text-gray-400 uppercase tracking-wider mb-1.5">ZIP Code *</label>
-                    <input 
-                      type="text" 
-                      required
-                      value={shippingInfo.zipCode}
-                      onChange={(e) => setShippingInfo({...shippingInfo, zipCode: e.target.value})}
-                      className="w-full border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:border-gray-900 transition-colors" 
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs text-gray-400 uppercase tracking-wider mb-1.5">Country *</label>
-                    <select 
-                      value={shippingInfo.country}
-                      onChange={(e) => setShippingInfo({...shippingInfo, country: e.target.value})}
-                      className="w-full border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:border-gray-900 transition-colors bg-white"
+                  <MagneticButton>
+                    <button 
+                      type="submit"
+                      className="w-full bg-gray-900 text-white py-3 text-sm hover:bg-gray-800 transition-colors mt-4"
                     >
-                      <option>United States</option>
-                      <option>Canada</option>
-                    </select>
-                  </div>
-                </div>
+                      Continue to Payment
+                    </button>
+                  </MagneticButton>
+                </form>
+              </motion.div>
+            )}
 
-                <button 
-                  type="submit"
-                  className="w-full bg-gray-900 text-white py-3 text-sm hover:bg-gray-800 transition-colors mt-4"
-                >
-                  Continue to Payment
-                </button>
-              </form>
-            </div>
-          )}
-
-          {step === 2 && (
-            <div className="border border-gray-100 p-6">
-              <h2 className="text-lg font-medium mb-6">Payment Information</h2>
-              
-              <form onSubmit={handlePaymentSubmit} className="space-y-6">
-                <div>
-                  <label className="block text-xs text-gray-400 uppercase tracking-wider mb-1.5">Shipping Address</label>
-                  <div className="text-sm text-gray-500 py-3 border-b border-gray-100">
-                    <p>{shippingInfo.firstName} {shippingInfo.lastName}</p>
-                    <p>{shippingInfo.street}</p>
-                    <p>{shippingInfo.city}, {shippingInfo.state} {shippingInfo.zipCode}</p>
-                    <p>{shippingInfo.country}</p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setStep(1)}
-                    className="text-sm text-gray-400 hover:text-gray-900 mt-2 transition-colors"
+            {step === 2 && (
+              <motion.div
+                key={2}
+                className="border border-gray-100 p-6"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.35 }}
+              >
+                <h2 className="text-lg font-medium mb-6">Payment Information</h2>
+                
+                <form onSubmit={handlePaymentSubmit} className="space-y-6">
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0 * 0.05, duration: 0.3 }}
                   >
-                    Edit
-                  </button>
-                </div>
+                    <label className="block text-xs text-gray-400 uppercase tracking-wider mb-1.5">Shipping Address</label>
+                    <div className="text-sm text-gray-500 py-3 border-b border-gray-100">
+                      <p>{shippingInfo.firstName} {shippingInfo.lastName}</p>
+                      <p>{shippingInfo.street}</p>
+                      <p>{shippingInfo.city}, {shippingInfo.state} {shippingInfo.zipCode}</p>
+                      <p>{shippingInfo.country}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setStep(1)}
+                      className="text-sm text-gray-400 hover:text-gray-900 mt-2 transition-colors"
+                    >
+                      Edit
+                    </button>
+                  </motion.div>
 
-                <div>
-                  <label className="block text-xs text-gray-400 uppercase tracking-wider mb-1.5">Card Information</label>
-                  <div className="border border-gray-200 px-3 py-2.5">
-                    <CardElement
-                      options={{
-                        style: {
-                          base: {
-                            fontSize: '14px',
-                            color: '#111827',
-                            '::placeholder': {
-                              color: '#9CA3AF'
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 1 * 0.05, duration: 0.3 }}
+                  >
+                    <label className="block text-xs text-gray-400 uppercase tracking-wider mb-1.5">Card Information</label>
+                    <div className="border border-gray-200 px-3 py-2.5">
+                      <CardElement
+                        options={{
+                          style: {
+                            base: {
+                              fontSize: '14px',
+                              color: '#111827',
+                              '::placeholder': {
+                                color: '#9CA3AF'
+                              }
+                            },
+                            invalid: {
+                              color: '#EF4444'
                             }
-                          },
-                          invalid: {
-                            color: '#EF4444'
                           }
-                        }
-                      }}
-                    />
-                  </div>
-                  <p className="text-xs text-gray-300 mt-2">
-                    Test: 4242 4242 4242 4242 · Any future date · Any CVC
-                  </p>
-                </div>
+                        }}
+                      />
+                    </div>
+                    <p className="text-xs text-gray-300 mt-2">
+                      Test: 4242 4242 4242 4242 · Any future date · Any CVC
+                    </p>
+                  </motion.div>
 
-                <div className="flex flex-col gap-3 pt-2">
-                  <button 
-                    type="submit"
-                    disabled={!stripe || isProcessing}
-                    className="w-full bg-gray-900 text-white py-3 text-sm hover:bg-gray-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                  <motion.div
+                    className="flex flex-col gap-3 pt-2"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 2 * 0.05, duration: 0.3 }}
                   >
-                    {isProcessing ? 'Processing...' : `Pay ${formatPrice(amounts.total)}`}
-                  </button>
-                  <button 
-                    type="button"
-                    onClick={() => setStep(1)}
-                    disabled={isProcessing}
-                    className="text-sm text-gray-400 hover:text-gray-900 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                  >
-                    Back to Shipping
-                  </button>
-                </div>
-              </form>
-            </div>
-          )}
+                    <MagneticButton>
+                      <button 
+                        type="submit"
+                        disabled={!stripe || isProcessing}
+                        className="w-full bg-gray-900 text-white py-3 text-sm hover:bg-gray-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                      >
+                        {isProcessing ? (
+                          <>
+                            <motion.div
+                              className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full"
+                              animate={{ rotate: 360 }}
+                              transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }}
+                            />
+                            Processing...
+                          </>
+                        ) : (
+                          `Pay ${formatPrice(amounts.total)}`
+                        )}
+                      </button>
+                    </MagneticButton>
+                    <button 
+                      type="button"
+                      onClick={() => setStep(1)}
+                      disabled={isProcessing}
+                      className="text-sm text-gray-400 hover:text-gray-900 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                      Back to Shipping
+                    </button>
+                  </motion.div>
+                </form>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* Order Summary */}
         <div>
-          <div className="border border-gray-100 p-6 sticky top-24">
-            <h2 className="text-lg font-medium mb-6">Order Summary</h2>
-            
-            <div className="space-y-4 mb-6 max-h-60 overflow-y-auto">
-              {cart.map((item) => (
-                <div key={`${item.productId}-${item.size}-${item.color}`} className="flex gap-3">
-                  <img 
-                    src={item.image} 
-                    alt={item.name}
-                    className="w-12 h-12 object-cover bg-gray-50 flex-shrink-0"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs truncate">{item.name}</p>
-                    <p className="text-xs text-gray-400">
-                      {item.size}{item.color && ` · ${item.color}`} · Qty {item.quantity}
-                    </p>
-                  </div>
-                  <span className="text-sm flex-shrink-0">{formatPrice(item.price * item.quantity)}</span>
-                </div>
-              ))}
-            </div>
+          <ScrollReveal direction="right">
+            <div className="border border-gray-100 p-6 sticky top-24">
+              <h2 className="text-lg font-medium mb-6">Order Summary</h2>
+              
+              <div className="space-y-4 mb-6 max-h-60 overflow-y-auto">
+                {cart.map((item, idx) => (
+                  <motion.div
+                    key={`${item.productId}-${item.size}-${item.color}`}
+                    className="flex gap-3"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: idx * 0.08, duration: 0.3 }}
+                  >
+                    <img 
+                      src={item.image} 
+                      alt={item.name}
+                      className="w-12 h-12 object-cover bg-gray-50 flex-shrink-0"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs truncate">{item.name}</p>
+                      <p className="text-xs text-gray-400">
+                        {item.size}{item.color && ` · ${item.color}`} · Qty {item.quantity}
+                      </p>
+                    </div>
+                    <span className="text-sm flex-shrink-0">{formatPrice(item.price * item.quantity)}</span>
+                  </motion.div>
+                ))}
+              </div>
 
-            <div className="space-y-2 border-t border-gray-100 pt-4">
-              <div className="flex justify-between">
-                <span className="text-sm text-gray-400">Subtotal</span>
-                <span className="text-sm">{formatPrice(amounts.subtotal)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm text-gray-400">Shipping</span>
-                <span className="text-sm">
-                  {amounts.shipping === 0 ? 'Free' : formatPrice(amounts.shipping)}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm text-gray-400">Tax</span>
-                <span className="text-sm">{formatPrice(amounts.tax)}</span>
-              </div>
-              <div className="border-t border-gray-100 pt-3 flex justify-between">
-                <span className="font-medium">Total</span>
-                <span className="font-medium">{formatPrice(amounts.total)}</span>
+              <div className="space-y-2 border-t border-gray-100 pt-4">
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-400">Subtotal</span>
+                  <span className="text-sm">{formatPrice(amounts.subtotal)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-400">Shipping</span>
+                  <span className="text-sm">
+                    {amounts.shipping === 0 ? 'Free' : formatPrice(amounts.shipping)}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-400">Tax</span>
+                  <span className="text-sm">{formatPrice(amounts.tax)}</span>
+                </div>
+                <div className="border-t border-gray-100 pt-3 flex justify-between">
+                  <span className="font-medium">Total</span>
+                  <span className="font-medium">{formatPrice(amounts.total)}</span>
+                </div>
               </div>
             </div>
-          </div>
+          </ScrollReveal>
         </div>
       </div>
     </div>
